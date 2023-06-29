@@ -9,17 +9,33 @@ defmodule ChatWeb.RoomController do
     render(conn, :index, rooms: rooms)
   end
 
+  def my_rooms(conn, _params) do
+    rooms =
+      conn
+      |> ChatWeb.Utils.current_user_id()
+      |> Rooms.list_rooms_by_user_id()
+
+    render(conn, :my_rooms, rooms: rooms)
+  end
+
   def new(conn, _params) do
     changeset = Rooms.change_room(%Room{})
     render(conn, :new, changeset: changeset)
   end
 
   def create(conn, %{"room" => room_params}) do
-    case Rooms.create_room(room_params) do
-      {:ok, room} ->
+    user_id = ChatWeb.Utils.current_user_id(conn)
+
+    result =
+      room_params
+      |> Map.put("owner_id", user_id)
+      |> Rooms.create_room()
+
+    case result do
+      {:ok, _} ->
         conn
         |> put_flash(:info, "Room created successfully.")
-        |> redirect(to: ~p"/rooms/#{room}")
+        |> redirect(to: ~p"/rooms/")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :new, changeset: changeset)
@@ -41,10 +57,10 @@ defmodule ChatWeb.RoomController do
     room = Rooms.get_room!(id)
 
     case Rooms.update_room(room, room_params) do
-      {:ok, room} ->
+      {:ok, _} ->
         conn
         |> put_flash(:info, "Room updated successfully.")
-        |> redirect(to: ~p"/rooms/#{room}")
+        |> redirect(to: ~p"/rooms")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :edit, room: room, changeset: changeset)

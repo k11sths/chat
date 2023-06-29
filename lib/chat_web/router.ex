@@ -17,12 +17,6 @@ defmodule ChatWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", ChatWeb do
-    pipe_through :browser
-
-    get "/", PageController, :home
-  end
-
   # Other scopes may use custom stacks.
   # scope "/api", ChatWeb do
   #   pipe_through :api
@@ -81,5 +75,18 @@ defmodule ChatWeb.Router do
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
     end
+  end
+
+  scope "/", ChatWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get("/", RoomController, :index)
+    get("/rooms/my-rooms", RoomController, :my_rooms)
+    get("/rooms/new", RoomController, :new)
+    get("/rooms/:id/edit", RoomController, :edit)
+    post("/rooms/", RoomController, :create)
+    put("/rooms/:id", RoomController, :update)
+    delete("/rooms/:id", RoomController, :delete)
+    # live "/:id", RoomsLive, :join
   end
 end

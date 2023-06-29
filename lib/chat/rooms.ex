@@ -22,6 +22,23 @@ defmodule Chat.Rooms do
   end
 
   @doc """
+  Returns the list of rooms.
+
+  ## Examples
+
+      iex> list_rooms()
+      [%Room{}, ...]
+
+  """
+  def list_rooms_by_user_id(user_id) do
+    Repo.all(from(
+      r in Room,
+      where: r.owner_id == ^user_id,
+      order_by: [desc: :inserted_at]
+    ))
+  end
+
+  @doc """
   Gets a single room.
 
   Raises `Ecto.NoResultsError` if the Room does not exist.

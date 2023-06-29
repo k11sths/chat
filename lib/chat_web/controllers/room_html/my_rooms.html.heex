@@ -1,0 +1,27 @@
+<.header>
+  Manage Owned Rooms
+  <:actions>
+    <.link href={~p"/rooms/new"}>
+      <.button>New Room</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="rooms" rows={@rooms} row_click={&JS.navigate(~p"/rooms/#{&1}")}>
+  <:col :let={room} label="Name"><%= room.name %></:col>
+  <:action :let={room}>
+    <div class="sr-only">
+      <.link navigate={~p"/rooms/#{room}"}>Show</.link>
+    </div>
+    <%= if room.owner_id == @current_user.id do %>
+      <.link navigate={~p"/rooms/#{room}/edit"}>Edit</.link>
+    <% end %>
+  </:action>
+  <:action :let={room}>
+    <%= if room.owner_id == @current_user.id do %>
+      <.link href={~p"/rooms/#{room}"} method="delete" data-confirm="Are you sure?">
+        Delete
+      </.link>
+    <% end %>
+  </:action>
+</.table>
