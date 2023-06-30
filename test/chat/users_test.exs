@@ -35,16 +35,16 @@ defmodule Chat.UsersTest do
     end
   end
 
-  describe "get_user!/1" do
+  describe "get!/1" do
     test "raises if id is invalid" do
       assert_raise Ecto.NoResultsError, fn ->
-        Users.get_user!("11111111-1111-1111-1111-111111111111")
+        Users.get!("11111111-1111-1111-1111-111111111111")
       end
     end
 
     test "returns the user with the given id" do
       %{id: id} = user = user_fixture()
-      assert %User{id: ^id} = Users.get_user!(user.id)
+      assert %User{id: ^id} = Users.get!(user.id)
     end
   end
 
@@ -169,7 +169,7 @@ defmodule Chat.UsersTest do
       email = unique_user_email()
       {:ok, user} = Users.apply_user_email(user, valid_user_password(), %{email: email})
       assert user.email == email
-      assert Users.get_user!(user.id).email != email
+      assert Users.get!(user.id).email != email
     end
   end
 

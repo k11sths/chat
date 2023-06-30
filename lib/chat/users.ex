@@ -51,14 +51,14 @@ defmodule Chat.Users do
 
   ## Examples
 
-      iex> get_user!(123)
+      iex> get!(123)
       %User{}
 
-      iex> get_user!(456)
+      iex> get!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get!(id), do: Repo.get!(User, id)
 
   ## User registration
 

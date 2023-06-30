@@ -14,7 +14,7 @@ defmodule Chat.RoomsFixtures do
         name: "some name",
         owner_id: "some owner_id"
       })
-      |> Chat.Rooms.create_room()
+      |> Chat.Rooms.create()
 
     room
   end

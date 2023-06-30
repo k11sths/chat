@@ -13,29 +13,29 @@ defmodule Chat.Rooms do
 
   ## Examples
 
-      iex> list_rooms()
+      iex> list_all()
       [%Room{}, ...]
 
   """
-  def list_rooms do
-    Repo.all(Room)
-  end
+  def list_all(preloads \\ []), do: Room |> Repo.all() |> Repo.preload(preloads)
 
   @doc """
-  Returns the list of rooms.
+  Returns the list of all user's rooms.
 
   ## Examples
 
-      iex> list_rooms()
+      iex> list_all_by_user_id(user_id)
       [%Room{}, ...]
 
   """
-  def list_rooms_by_user_id(user_id) do
-    Repo.all(from(
+  def list_all_by_user_id(user_id, preloads \\ []) do
+    from(
       r in Room,
       where: r.owner_id == ^user_id,
       order_by: [desc: :inserted_at]
-    ))
+    )
+    |> Repo.all()
+    |> Repo.preload(preloads)
   end
 
   @doc """
@@ -45,28 +45,61 @@ defmodule Chat.Rooms do
 
   ## Examples
 
-      iex> get_room!(123)
+      iex> get!(123)
       %Room{}
 
-      iex> get_room!(456)
+      iex> get!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_room!(id), do: Repo.get!(Room, id)
+  def get!(id, preloads \\ []), do: Room |> Repo.get!(id) |> Repo.preload(preloads)
+
+  @doc """
+  Gets a single room or returns nil.
+
+  ## Examples
+
+      iex> get(123)
+      %Room{}
+
+      iex> get(456)
+      nil
+
+  """
+  def get(id, preloads \\ []), do: Room |> Repo.get(id) |> Repo.preload(preloads)
+
+  @doc """
+  Fetches a single room or returns an error tuple.
+
+  ## Examples
+
+      iex> fetch(123)
+      {:ok, %Room{}}
+
+      iex> get(456)
+      {:error, :not_found}
+
+  """
+  def fetch(id, preloads \\ []) do
+    case get(id, preloads) do
+      nil -> {:error, :not_found}
+      room -> {:ok, room}
+    end
+  end
 
   @doc """
   Creates a room.
 
   ## Examples
 
-      iex> create_room(%{field: value})
+      iex> create(%{field: value})
       {:ok, %Room{}}
 
-      iex> create_room(%{field: bad_value})
+      iex> create(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_room(attrs \\ %{}) do
+  def create(attrs \\ %{}) do
     %Room{}
     |> Room.changeset(attrs)
     |> Repo.insert()
@@ -77,14 +110,14 @@ defmodule Chat.Rooms do
 
   ## Examples
 
-      iex> update_room(room, %{field: new_value})
+      iex> update(room, %{field: new_value})
       {:ok, %Room{}}
 
-      iex> update_room(room, %{field: bad_value})
+      iex> update(room, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_room(%Room{} = room, attrs) do
+  def update(%Room{} = room, attrs) do
     room
     |> Room.changeset(attrs)
     |> Repo.update()
@@ -95,14 +128,14 @@ defmodule Chat.Rooms do
 
   ## Examples
 
-      iex> delete_room(room)
+      iex> delete(room)
       {:ok, %Room{}}
 
-      iex> delete_room(room)
+      iex> delete(room)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_room(%Room{} = room) do
+  def delete(%Room{} = room) do
     Repo.delete(room)
   end
 

@@ -5,7 +5,7 @@ defmodule ChatWeb.RoomController do
   alias Chat.Rooms.Room
 
   def index(conn, _params) do
-    rooms = Rooms.list_rooms()
+    rooms = Rooms.list_all()
     render(conn, :index, rooms: rooms)
   end
 
@@ -13,7 +13,7 @@ defmodule ChatWeb.RoomController do
     rooms =
       conn
       |> ChatWeb.Utils.current_user_id()
-      |> Rooms.list_rooms_by_user_id()
+      |> Rooms.list_all_by_user_id()
 
     render(conn, :my_rooms, rooms: rooms)
   end
@@ -29,7 +29,7 @@ defmodule ChatWeb.RoomController do
     result =
       room_params
       |> Map.put("owner_id", user_id)
-      |> Rooms.create_room()
+      |> Rooms.create()
 
     case result do
       {:ok, _} ->
@@ -43,20 +43,20 @@ defmodule ChatWeb.RoomController do
   end
 
   def show(conn, %{"id" => id}) do
-    room = Rooms.get_room!(id)
+    room = Rooms.get!(id)
     render(conn, :show, room: room)
   end
 
   def edit(conn, %{"id" => id}) do
-    room = Rooms.get_room!(id)
+    room = Rooms.get!(id)
     changeset = Rooms.change_room(room)
     render(conn, :edit, room: room, changeset: changeset)
   end
 
   def update(conn, %{"id" => id, "room" => room_params}) do
-    room = Rooms.get_room!(id)
+    room = Rooms.get!(id)
 
-    case Rooms.update_room(room, room_params) do
+    case Rooms.update(room, room_params) do
       {:ok, _} ->
         conn
         |> put_flash(:info, "Room updated successfully.")
@@ -68,8 +68,8 @@ defmodule ChatWeb.RoomController do
   end
 
   def delete(conn, %{"id" => id}) do
-    room = Rooms.get_room!(id)
-    {:ok, _room} = Rooms.delete_room(room)
+    room = Rooms.get!(id)
+    {:ok, _room} = Rooms.delete(room)
 
     conn
     |> put_flash(:info, "Room deleted successfully.")

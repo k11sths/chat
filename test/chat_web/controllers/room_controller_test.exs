@@ -39,7 +39,7 @@ defmodule ChatWeb.RoomControllerTest do
   end
 
   describe "edit room" do
-    setup [:create_room]
+    setup [:create]
 
     test "renders form for editing chosen room", %{conn: conn, room: room} do
       conn = get(conn, ~p"/rooms/#{room}/edit")
@@ -48,7 +48,7 @@ defmodule ChatWeb.RoomControllerTest do
   end
 
   describe "update room" do
-    setup [:create_room]
+    setup [:create]
 
     test "redirects when data is valid", %{conn: conn, room: room} do
       conn = put(conn, ~p"/rooms/#{room}", room: @update_attrs)
@@ -65,7 +65,7 @@ defmodule ChatWeb.RoomControllerTest do
   end
 
   describe "delete room" do
-    setup [:create_room]
+    setup [:create]
 
     test "deletes chosen room", %{conn: conn, room: room} do
       conn = delete(conn, ~p"/rooms/#{room}")
@@ -77,7 +77,7 @@ defmodule ChatWeb.RoomControllerTest do
     end
   end
 
-  defp create_room(_) do
+  defp create(_) do
     room = room_fixture()
     %{room: room}
   end
