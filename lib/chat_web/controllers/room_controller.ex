@@ -35,7 +35,7 @@ defmodule ChatWeb.RoomController do
       {:ok, _} ->
         conn
         |> put_flash(:info, "Room created successfully.")
-        |> redirect(to: ~p"/rooms/")
+        |> redirect(to: ~p"/rooms/my-rooms")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :new, changeset: changeset)
@@ -43,36 +43,67 @@ defmodule ChatWeb.RoomController do
   end
 
   def show(conn, %{"id" => id}) do
-    room = Rooms.get!(id)
-    render(conn, :show, room: room)
+    case Rooms.fetch(id) do
+      {:ok, room} ->
+        render(conn, :show, room: room)
+
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Room not found"})
+    end
   end
 
   def edit(conn, %{"id" => id}) do
-    room = Rooms.get!(id)
-    changeset = Rooms.change_room(room)
-    render(conn, :edit, room: room, changeset: changeset)
+    case Rooms.fetch(id) do
+      {:ok, room} ->
+        changeset = Rooms.change_room(room)
+        render(conn, :edit, room: room, changeset: changeset)
+
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Room not found"})
+    end
   end
 
   def update(conn, %{"id" => id, "room" => room_params}) do
-    room = Rooms.get!(id)
+    case Rooms.fetch(id) do
+      {:ok, room} ->
+        case Rooms.update(room, room_params) do
+          {:ok, _} ->
+            conn
+            |> put_flash(:info, "Room updated successfully.")
+            |> redirect(to: ~p"/rooms/my-rooms")
 
-    case Rooms.update(room, room_params) do
-      {:ok, _} ->
+          {:error, %Ecto.Changeset{} = changeset} ->
+            render(conn, :edit, room: room, changeset: changeset)
+        end
+
+      {:error, :not_found} ->
         conn
-        |> put_flash(:info, "Room updated successfully.")
-        |> redirect(to: ~p"/rooms")
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, :edit, room: room, changeset: changeset)
+        |> put_status(:not_found)
+        |> json(%{error: "Room not found"})
     end
   end
 
   def delete(conn, %{"id" => id}) do
-    room = Rooms.get!(id)
-    {:ok, _room} = Rooms.delete(room)
+    case Rooms.fetch(id) do
+      {:ok, room} ->
+        case Rooms.delete(room) do
+          {:ok, _room} ->
+            conn
+            |> put_flash(:info, "Room deleted successfully.")
+            |> redirect(to: ~p"/rooms/my-rooms")
 
-    conn
-    |> put_flash(:info, "Room deleted successfully.")
-    |> redirect(to: ~p"/rooms")
+          {:error, %Ecto.Changeset{} = changeset} ->
+            render(conn, :delete, room: room, changeset: changeset)
+        end
+
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Room not found"})
+    end
   end
 end

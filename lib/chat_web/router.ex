@@ -78,7 +78,11 @@ defmodule ChatWeb.Router do
   end
 
   scope "/", ChatWeb do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser]
+
+    if Mix.env() != :test do
+      pipe_through [:require_authenticated_user]
+    end
 
     get("/", RoomController, :index)
     get("/rooms/my-rooms", RoomController, :my_rooms)

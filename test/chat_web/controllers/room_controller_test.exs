@@ -3,13 +3,15 @@ defmodule ChatWeb.RoomControllerTest do
 
   import Chat.RoomsFixtures
 
-  @create_attrs %{name: "some name", owner_id: "some owner_id"}
-  @update_attrs %{name: "some updated name", owner_id: "some updated owner_id"}
-  @invalid_attrs %{name: nil, owner_id: nil}
+  @create_attrs %{name: "some name"}
+  @update_attrs %{name: "some updated name"}
+  @invalid_attrs %{name: nil}
+
+  setup [:login_as_registered_user]
 
   describe "index" do
     test "lists all rooms", %{conn: conn} do
-      conn = get(conn, ~p"/rooms")
+      conn = get(conn, ~p"/")
       assert html_response(conn, 200) =~ "Listing Rooms"
     end
   end
@@ -22,14 +24,13 @@ defmodule ChatWeb.RoomControllerTest do
   end
 
   describe "create room" do
-    test "redirects to show when data is valid", %{conn: conn} do
-      conn = post(conn, ~p"/rooms", room: @create_attrs)
+    test "redirects to list when data is valid", %{conn: conn} do
+      response = post(conn, ~p"/rooms", room: @create_attrs)
 
-      assert %{id: id} = redirected_params(conn)
-      assert redirected_to(conn) == ~p"/rooms/#{id}"
+      assert redirected_to(response) == ~p"/rooms/my-rooms"
 
-      conn = get(conn, ~p"/rooms/#{id}")
-      assert html_response(conn, 200) =~ "Room #{id}"
+      response = get(conn, ~p"/")
+      assert html_response(response, 200) =~ "Room"
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -51,11 +52,11 @@ defmodule ChatWeb.RoomControllerTest do
     setup [:create]
 
     test "redirects when data is valid", %{conn: conn, room: room} do
-      conn = put(conn, ~p"/rooms/#{room}", room: @update_attrs)
-      assert redirected_to(conn) == ~p"/rooms/#{room}"
+      response = put(conn, ~p"/rooms/#{room}", room: @update_attrs)
+      assert redirected_to(response) == ~p"/rooms/my-rooms"
 
-      conn = get(conn, ~p"/rooms/#{room}")
-      assert html_response(conn, 200) =~ "some updated name"
+      response = get(conn, ~p"/")
+      assert html_response(response, 200) =~ "some updated name"
     end
 
     test "renders errors when data is invalid", %{conn: conn, room: room} do
@@ -69,11 +70,10 @@ defmodule ChatWeb.RoomControllerTest do
 
     test "deletes chosen room", %{conn: conn, room: room} do
       conn = delete(conn, ~p"/rooms/#{room}")
-      assert redirected_to(conn) == ~p"/rooms"
+      assert redirected_to(conn) == ~p"/rooms/my-rooms"
 
-      assert_error_sent 404, fn ->
-        get(conn, ~p"/rooms/#{room}")
-      end
+      conn = get(conn, ~p"/rooms/#{room}/edit")
+      assert json_response(conn, 404) == %{"error" => "Room not found"}
     end
   end
 

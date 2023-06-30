@@ -7,6 +7,7 @@ defmodule Chat.RoomsTest do
     alias Chat.Rooms.Room
 
     import Chat.RoomsFixtures
+    import Chat.UsersFixtures
 
     @invalid_attrs %{name: nil, owner_id: nil}
 
@@ -21,11 +22,12 @@ defmodule Chat.RoomsTest do
     end
 
     test "create/1 with valid data creates a room" do
-      valid_attrs = %{name: "some name", owner_id: "some owner_id"}
+      user = user_fixture()
+      valid_attrs = %{name: "some name", owner_id: user.id}
 
       assert {:ok, %Room{} = room} = Rooms.create(valid_attrs)
       assert room.name == "some name"
-      assert room.owner_id == "some owner_id"
+      assert room.owner_id == user.id
     end
 
     test "create/1 with invalid data returns error changeset" do
@@ -34,11 +36,10 @@ defmodule Chat.RoomsTest do
 
     test "update/2 with valid data updates the room" do
       room = room_fixture()
-      update_attrs = %{name: "some updated name", owner_id: "some updated owner_id"}
+      update_attrs = %{name: "some updated name"}
 
       assert {:ok, %Room{} = room} = Rooms.update(room, update_attrs)
       assert room.name == "some updated name"
-      assert room.owner_id == "some updated owner_id"
     end
 
     test "update/2 with invalid data returns error changeset" do

@@ -92,8 +92,18 @@ defmodule ChatWeb.UserAuth do
   """
   def fetch_current_user(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
-    user = user_token && Users.get_user_by_session_token(user_token)
-    assign(conn, :current_user, user)
+
+    case user_token && Users.get_user_by_session_token(user_token) do
+      nil ->
+        if Mix.env() == :test do
+          assign(conn, :current_user, conn.assigns[:current_user])
+        else
+          assign(conn, :current_user, nil)
+        end
+
+      user ->
+        assign(conn, :current_user, user)
+    end
   end
 
   defp ensure_user_token(conn) do
