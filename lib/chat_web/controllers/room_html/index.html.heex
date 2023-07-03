@@ -1,4 +1,4 @@
-<.header> Listing Rooms </.header>
+<.header>Listing Rooms</.header>
 
 <.table id="rooms" rows={@rooms} row_click={&JS.navigate(~p"/rooms/#{&1}")}>
   <:col :let={room} label="Name"><%= room.name %></:col>

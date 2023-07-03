@@ -84,13 +84,13 @@ defmodule ChatWeb.Router do
       pipe_through [:require_authenticated_user]
     end
 
-    get("/", RoomController, :index)
-    get("/rooms/my-rooms", RoomController, :my_rooms)
-    get("/rooms/new", RoomController, :new)
-    get("/rooms/:id/edit", RoomController, :edit)
-    post("/rooms/", RoomController, :create)
-    put("/rooms/:id", RoomController, :update)
-    delete("/rooms/:id", RoomController, :delete)
-    # live "/:id", RoomsLive, :join
+    get "/", RoomController, :index
+    get "/rooms/my-rooms", RoomController, :my_rooms
+    get "/rooms/new", RoomController, :new
+    get "/rooms/:id/edit", RoomController, :edit
+    post "/rooms/", RoomController, :create
+    put "/rooms/:id", RoomController, :update
+    delete "/rooms/:id", RoomController, :delete
+    live "/rooms/:id", RoomLive, :join
   end
 end
