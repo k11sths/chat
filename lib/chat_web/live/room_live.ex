@@ -17,7 +17,7 @@ defmodule ChatWeb.RoomLive do
       <div id="chat_messages" phx-update="append">
         <%= for message <- @messages do %>
           <p id={message.id}>
-            <strong><%= Map.get(message, :username, "system") %>:</strong> <%= message.content %>
+            <strong><%= Map.get(message.user, :username, "system") %>:</strong> <%= message.content %>
           </p>
         <% end %>
       </div>
@@ -42,10 +42,8 @@ defmodule ChatWeb.RoomLive do
   def mount(%{"id" => room_id}, %{"user_token" => user_token}, socket) do
     case Rooms.fetch(room_id) do
       {:ok, room} ->
-        messages = Messages.all_by_room_id(room_id, :users)
-
-        %{id: current_user_id, email: email} = Users.get_user_by_session_token(user_token)
-        [username | _] = String.split(email, "@")
+        messages = Messages.all_by_room_id(room_id, :user)
+        %{id: current_user_id, username: username} = Users.get_user_by_session_token(user_token)
         topic = "room: #{room_id}"
 
         if connected?(socket) do
@@ -72,22 +70,11 @@ defmodule ChatWeb.RoomLive do
 
   @impl true
   def handle_event("send_message", %{"message" => content}, socket) do
-    %{
-      assigns: %{
-        topic: topic,
-        current_user_id: current_user_id,
-        username: username,
-        room: %{id: room_id}
-      }
-    } = socket
+    %{assigns: %{topic: topic, current_user_id: current_user_id, room: %{id: room_id}}} = socket
 
-    case Messages.create(content, current_user_id, room_id) do
-      {:ok, %{id: id, content: content}} ->
-        ChatWeb.Endpoint.broadcast(topic, "new_message", %{
-          id: id,
-          content: content,
-          username: username
-        })
+    case Messages.create(content, current_user_id, room_id, :user) do
+      {:ok, new_message} ->
+        ChatWeb.Endpoint.broadcast(topic, "new_message", new_message)
 
         {:noreply, assign(socket, message: "")}
 
@@ -105,18 +92,19 @@ defmodule ChatWeb.RoomLive do
 
   @impl true
   def handle_info(%{event: "new_message", payload: new_message}, socket) do
+    IO.inspect(new_message.user)
     {:noreply, assign(socket, messages: [new_message])}
   end
 
   def handle_info(%{event: "presence_diff", payload: %{joins: joins, leaves: leaves}}, socket) do
     joins =
       Enum.map(joins, fn {username, _} ->
-        %{id: Ecto.UUID.generate(), content: "#{username} joined the chat"}
+        %{id: Ecto.UUID.generate(), content: "#{username} joined the chat", user: %{}}
       end)
 
     leaves =
       Enum.map(leaves, fn {username, _} ->
-        %{id: Ecto.UUID.generate(), content: "#{username} left the chat"}
+        %{id: Ecto.UUID.generate(), content: "#{username} left the chat", user: %{}}
       end)
 
     {:noreply, assign(socket, messages: List.flatten([joins | leaves]))}

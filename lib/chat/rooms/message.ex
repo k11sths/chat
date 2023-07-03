@@ -9,13 +9,13 @@ defmodule Chat.Rooms.Message do
   schema "messages" do
     field :content, :string
 
-    belongs_to(:users, Chat.Users.User,
+    belongs_to(:user, Chat.Users.User,
       type: :binary_id,
       foreign_key: :user_id,
       references: :id
     )
 
-    belongs_to(:rooms, Chat.Rooms.Room,
+    belongs_to(:room, Chat.Rooms.Room,
       type: :binary_id,
       foreign_key: :room_id,
       references: :id

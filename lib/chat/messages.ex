@@ -20,13 +20,19 @@ defmodule Chat.Messages do
     |> Repo.preload(preloads)
   end
 
-  def create(content, user_id, room_id) do
-    %Message{}
-    |> Message.changeset(%{
-      content: content,
-      user_id: user_id,
-      room_id: room_id
-    })
-    |> Repo.insert()
+  def create(content, user_id, room_id, preloads \\ []) do
+    result =
+      %Message{}
+      |> Message.changeset(%{
+        content: content,
+        user_id: user_id,
+        room_id: room_id
+      })
+      |> Repo.insert()
+
+    case result do
+      {:ok, message} -> {:ok, Repo.preload(message, preloads)}
+      error -> error
+    end
   end
 end

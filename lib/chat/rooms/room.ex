@@ -9,7 +9,7 @@ defmodule Chat.Rooms.Room do
   schema "rooms" do
     field :name, :string
 
-    belongs_to(:users, Chat.Users.User,
+    belongs_to(:user, Chat.Users.User,
       type: :binary_id,
       foreign_key: :owner_id,
       references: :id
