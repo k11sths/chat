@@ -40,11 +40,12 @@ defmodule ChatWeb.RoomLive do
 
   @impl true
   def mount(%{"id" => room_id}, %{"user_token" => user_token}, socket) do
-    case Rooms.fetch(room_id) do
-      {:ok, room} ->
+    topic = "room: #{room_id}"
+    %{id: current_user_id, username: username} = Users.get_user_by_session_token(user_token)
+
+    case {Rooms.fetch(room_id), ChatWeb.Presence.get_by_key(topic, username)} do
+      {{:ok, room}, []} ->
         messages = Messages.all_by_room_id(room_id, :user)
-        %{id: current_user_id, username: username} = Users.get_user_by_session_token(user_token)
-        topic = "room: #{room_id}"
 
         if connected?(socket) do
           ChatWeb.Endpoint.subscribe(topic)
@@ -60,10 +61,16 @@ defmodule ChatWeb.RoomLive do
          |> assign(message: "")
          |> assign(form: to_form(%{})), temporary_assigns: [form: nil, messages: messages]}
 
-      {:error, :not_found} ->
+      {{:error, :not_found}, _} ->
         {:ok,
          socket
          |> put_flash(:error, "Room not found.")
+         |> redirect(to: ~p"/")}
+
+      {_, _} ->
+        {:ok,
+         socket
+         |> put_flash(:error, "You are already in the room with another session.")
          |> redirect(to: ~p"/")}
     end
   end
@@ -86,15 +93,12 @@ defmodule ChatWeb.RoomLive do
     {:noreply, assign(socket, message: "")}
   end
 
-  def handle_event("form_update", %{"message" => message}, socket) do
-    {:noreply, assign(socket, message: message)}
-  end
+  def handle_event("form_update", %{"message" => message}, socket),
+    do: {:noreply, assign(socket, message: message)}
 
   @impl true
-  def handle_info(%{event: "new_message", payload: new_message}, socket) do
-    IO.inspect(new_message.user)
-    {:noreply, assign(socket, messages: [new_message])}
-  end
+  def handle_info(%{event: "new_message", payload: new_message}, socket),
+    do: {:noreply, assign(socket, messages: [new_message])}
 
   def handle_info(%{event: "presence_diff", payload: %{joins: joins, leaves: leaves}}, socket) do
     joins =
