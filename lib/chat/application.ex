@@ -18,7 +18,8 @@ defmodule Chat.Application do
       {Finch, name: Chat.Finch},
       # Start the Endpoint (http/https)
       ChatWeb.Endpoint,
-      ChatWeb.Presence
+      ChatWeb.Presence,
+      {DynamicSupervisor, strategy: :one_for_one, name: ChatWeb.LoadTestSupervisor}
       # Start a worker by calling: Chat.Worker.start_link(arg)
       # {Chat.Worker, arg}
     ]
