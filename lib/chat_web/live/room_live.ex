@@ -5,9 +5,9 @@ defmodule ChatWeb.RoomLive do
 
   require Logger
 
+  alias Chat.Messages
   alias Chat.Rooms
   alias Chat.Users
-  alias Chat.Messages
 
   @impl true
   def render(assigns) do
