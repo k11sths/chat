@@ -13,11 +13,12 @@ defmodule Chat.Messages do
     from(
       m in Message,
       where: m.room_id == ^room_id,
-      order_by: [asc: :inserted_at],
+      order_by: [desc: :inserted_at],
       limit: 20
     )
     |> Repo.all()
     |> Repo.preload(preloads)
+    |> Enum.reverse()
   end
 
   def create(content, user_id, room_id, preloads \\ []) do
