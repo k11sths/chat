@@ -1,7 +1,8 @@
 # Chat
 
-Chat is a Web Application that takes converts the user's enters time to in each
-of the saved cities timezone.
+Chat is a Web Application that allows the user, after register/login, to create chat rooms that allow every user to join.
+After joining a chat room the user can see live all the messages that being sent in this room and to participate by
+writing messages for all other users to see.
 
 To set up the application locally:
   * Install asdf if you haven't already
@@ -16,5 +17,10 @@ To set up the application locally:
 To start your Phoenix server:
   * Run `mix setup` to install and setup dependencies
   * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+  * Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+To test the application:
+  * Run `mix test` in order to perform the unit tests
+  * Run `iex -S mix phx.server` and follow up by running `ChatWeb.LoadTest.Interface.update_number_of_users(number_of_users, room_id)`
+  to perform a manually scalable load test (where number_of_users::integer and room_id::UUID) 
+  
