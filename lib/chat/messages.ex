@@ -36,4 +36,7 @@ defmodule Chat.Messages do
       error -> error
     end
   end
+
+  def delete_all_by_room_id(room_id),
+    do: Repo.delete_all(from(m in Message, where: m.room_id == ^room_id))
 end
